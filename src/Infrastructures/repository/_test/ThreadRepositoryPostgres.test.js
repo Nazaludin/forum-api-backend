@@ -48,7 +48,7 @@ describe('ThreadRepositoryPostgres', () => {
   });
 
   describe('verifyThreadExist function', () => {
-    it('should throw AuthenticationError when thread is not found', async () => {
+    it('should throw NotFoundError when thread is not found', async () => {
       // Arrange
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 

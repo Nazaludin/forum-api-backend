@@ -2,6 +2,7 @@ const CommentRepository = require('../../Domains/comments/CommentRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 const AddedComment = require('../../Domains/comments/entities/AddedComment');
+const CommentDetail = require('../../Domains/comments/entities/CommentDetail');
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -93,7 +94,11 @@ async softDeleteComment(commentId) {
     };
 
     const result = await this._pool.query(query);
-    return result.rows; 
+    return result.rows.map((row) => new CommentDetail({
+        ...row,
+        date: row.date.toISOString(),
+      }));
+      
 }
 
   
