@@ -116,6 +116,32 @@ describe('CommentRepositoryPostgres', () => {
     });
   });
 
+  describe('softDeleteComment function', () => {
+    it('should mark the comment as deleted successfully', async () => {
+        // Arrange
+        await CommentsTableTestHelper.addComment({ id: 'comment-123', content: 'Komentar uji coba' });
+        const commentRepository = new CommentRepositoryPostgres(pool, () => '123');
+
+        // Action
+        await commentRepository.softDeleteComment('comment-123');
+
+        // Assert (cek langsung ke database)
+        const comments = await CommentsTableTestHelper.findCommentById('comment-123');
+        expect(comments).toHaveLength(1);
+        expect(comments[0].is_deleted).toBe(true);
+    });
+
+    it('should throw NotFoundError when comment does not exist', async () => {
+        // Arrange
+        const commentRepository = new CommentRepositoryPostgres(pool, () => '123');
+
+        // Action & Assert
+        await expect(commentRepository.softDeleteComment('non-existent-comment'))
+            .rejects
+            .toThrow(NotFoundError);
+    });
+});
+
   describe('getCommentById function', () => {
     it('should return comment details correctly when comment exists', async () => {
       // Arrange
@@ -153,40 +179,47 @@ describe('CommentRepositoryPostgres', () => {
 
   describe('getCommentsByThreadId function', () => {
     it('should return list of comments ordered by date in ascending order', async () => {
-    
-        await CommentsTableTestHelper.addComment({
+      // Arrange
+      await CommentsTableTestHelper.addComment({
           id: 'comment-1',
           content: 'Komentar pertama',
           thread_id: 'thread-123',
           owner: 'user-123',
           date: '2024-02-15T10:01:00.000Z',
           is_deleted: false,
-        });
-    
-        await CommentsTableTestHelper.addComment({
+      });
+  
+      await CommentsTableTestHelper.addComment({
           id: 'comment-2',
           content: 'Komentar kedua',
           thread_id: 'thread-123',
           owner: 'user-123',
           date: '2024-02-15T10:02:00.000Z',
           is_deleted: false,
-        });
-    
-        const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, () => '123');
-    
-        // Action
-        const comments = await commentRepositoryPostgres.getCommentsByThreadId('thread-123');
-    
-        // Assert
-        expect(comments).toHaveLength(2);
-        expect(comments[0]).toBeInstanceOf(CommentDetail);
-        expect(comments[1]).toBeInstanceOf(CommentDetail);
-        expect(comments[0].id).toEqual('comment-1');
-        expect(comments[1].id).toEqual('comment-2');
-        expect(comments[0].username).toEqual('dicoding');
-        expect(comments[1].username).toEqual('dicoding');
-        expect(new Date(comments[0].date).getTime()).toBeLessThanOrEqual(new Date(comments[1].date).getTime());
       });
+  
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, () => '123');
+  
+      // Action
+      const comments = await commentRepositoryPostgres.getCommentsByThreadId('thread-123');
+  
+      // Assert
+      expect(comments).toHaveLength(2);
+      expect(comments[0]).toBeInstanceOf(CommentDetail);
+      expect(comments[1]).toBeInstanceOf(CommentDetail);
+  
+      expect(comments[0].id).toStrictEqual('comment-1');
+      expect(comments[1].id).toStrictEqual('comment-2');
+  
+      expect(comments[0].username).toStrictEqual('dicoding');
+      expect(comments[1].username).toStrictEqual('dicoding');
+  
+      expect(comments[0].date).toStrictEqual('2024-02-15T10:01:00.000Z');
+      expect(comments[1].date).toStrictEqual('2024-02-15T10:02:00.000Z');
+  
+      expect(new Date(comments[0].date).getTime()).toBeLessThan(new Date(comments[1].date).getTime());
+  });
+  
 
     it('should return an empty array when there are no comments', async () => {
       // Arrange

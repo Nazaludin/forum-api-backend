@@ -2,6 +2,7 @@ const AddCommentUseCase = require('../AddCommentUseCase');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const NewComment = require('../../../Domains/comments/entities/NewComment');
+const AddedComment = require('../../../Domains/comments/entities/AddedComment');
 
 describe('AddCommentUseCase', () => {
   it('should orchestrate the add comment action correctly', async () => {
@@ -11,35 +12,40 @@ describe('AddCommentUseCase', () => {
     };
     const owner = 'user-123';
     const threadId = 'thread-123';
-
-    const expectedAddedComment = {
-      id: 'comment-123',
-      content: useCasePayload.content,
-    };
-
+  
     // Mocking repositories
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
+  
+    mockThreadRepository.verifyThreadExist = jest.fn().mockResolvedValue();
+    mockCommentRepository.addComment = jest.fn().mockResolvedValue(
+      new AddedComment({
+        id: 'comment-123',
+        content: useCasePayload.content,
+        owner,
+      })
+    );
 
-    // Mock implementations
-    mockThreadRepository.verifyThreadExist = jest.fn().mockResolvedValue(); // ✅ Harus ada
-    mockCommentRepository.addComment = jest.fn().mockResolvedValue(expectedAddedComment);
-
-    // Create use case instance
     const addCommentUseCase = new AddCommentUseCase({ 
       threadRepository: mockThreadRepository, 
       commentRepository: mockCommentRepository 
     });
-
+  
     // Act
     const addedComment = await addCommentUseCase.execute(useCasePayload, threadId, owner);
-
+  
     // Assert
     expect(mockThreadRepository.verifyThreadExist).toHaveBeenCalledWith(threadId);
     expect(mockCommentRepository.addComment)
-      .toBeCalledWith(expect.any(NewComment), threadId, owner);
-    expect(addedComment).toStrictEqual(expectedAddedComment);
+      .toHaveBeenCalledWith(expect.any(NewComment), threadId, owner);
+  
+    expect(addedComment).toStrictEqual(new AddedComment({
+      id: 'comment-123',
+      content: useCasePayload.content,
+      owner,
+    }));
   });
+  
 
   it('should throw error when payload does not contain needed properties', async () => {
     // Arrange

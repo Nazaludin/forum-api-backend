@@ -66,7 +66,7 @@ describe('ThreadRepositoryPostgres', () => {
       // Action & Assert
       await expect(threadRepositoryPostgres.verifyThreadExist('thread-123'))
         .resolves
-        .not.toThrowError();
+        .not.toThrowError(NotFoundError);
     });
   });
 

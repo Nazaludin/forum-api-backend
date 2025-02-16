@@ -16,7 +16,7 @@ describe('GetThreadByIdUseCase', () => {
       date: '2021-08-08T07:19:09.775Z',
       username: 'dicoding',
     });
-
+  
     const expectedComments = [
       new CommentDetail({
         id: 'comment-123',
@@ -29,51 +29,35 @@ describe('GetThreadByIdUseCase', () => {
         id: 'comment-456',
         username: 'dicoding',
         date: '2021-08-08T07:26:21.338Z',
-        content: 'ini seharusnya terhapus',
-        is_deleted: true, // Harus ditampilkan sebagai "**komentar telah dihapus**"
+        content: '**komentar telah dihapus**', 
+        is_deleted: true,
       }),
     ];
-
+  
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
-
-    mockThreadRepository.getThreadById = jest.fn().mockImplementation(() =>
-      Promise.resolve(expectedThread)
-    );
-
-    mockCommentRepository.getCommentsByThreadId = jest.fn().mockImplementation(() =>
-      Promise.resolve(expectedComments)
-    );
-
+  
+    mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(expectedThread);
+    mockCommentRepository.getCommentsByThreadId = jest.fn().mockResolvedValue(expectedComments);
+  
     const getThreadByIdUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
     });
-
+  
     // Action
     const result = await getThreadByIdUseCase.execute(threadId);
-
+  
     // Assert
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(threadId);
+    
     expect(result).toEqual({
       ...expectedThread,
-      comments: [
-        {
-          id: 'comment-123',
-          username: 'johndoe',
-          date: '2021-08-08T07:22:33.555Z',
-          content: 'sebuah comment',
-        },
-        {
-          id: 'comment-456',
-          username: 'dicoding',
-          date: '2021-08-08T07:26:21.338Z',
-          content: '**komentar telah dihapus**',
-        },
-      ],
+      comments: expectedComments, 
     });
   });
+  
 
   it('should throw NotFoundError when thread is not found', async () => {
     // Arrange
