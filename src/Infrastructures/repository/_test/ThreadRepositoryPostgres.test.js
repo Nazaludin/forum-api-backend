@@ -29,7 +29,7 @@ describe('ThreadRepositoryPostgres', () => {
         title: 'Dicoding',
         body: 'Dicoding Indonesia',
       });
-      const fakeIdGenerator = () => '123'; 
+      const fakeIdGenerator = () => '123';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
@@ -46,12 +46,12 @@ describe('ThreadRepositoryPostgres', () => {
       expect(threads).toHaveLength(1);
 
       // Verifikasi semua field di database
-    const threadInDb = threads[0];
-    expect(threadInDb.title).toBe('Dicoding');
-    expect(threadInDb.body).toBe('Dicoding Indonesia');
-    expect(threadInDb.owner).toBe('user-123');
-    expect(threadInDb.date).toBeDefined();
-    expect(new Date(threadInDb.date)).toBeInstanceOf(Date);
+      const threadInDb = threads[0];
+      expect(threadInDb.title).toBe('Dicoding');
+      expect(threadInDb.body).toBe('Dicoding Indonesia');
+      expect(threadInDb.owner).toBe('user-123');
+      expect(threadInDb.date).toBeDefined();
+      expect(new Date(threadInDb.date)).toBeInstanceOf(Date);
     });
   });
 
@@ -85,10 +85,10 @@ describe('ThreadRepositoryPostgres', () => {
         title: 'Dicoding',
         body: 'Dicoding Indonesia',
       });
-  
+
       const fakeIdGenerator = () => '123';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
-  
+
       await ThreadsTableTestHelper.addThread({
         id: 'thread-123',
         title: newThread.title,
@@ -96,10 +96,10 @@ describe('ThreadRepositoryPostgres', () => {
         owner: 'user-123',
         date: '2024-02-15T10:00:00.000Z',
       });
-  
+
       // Action
       const thread = await threadRepositoryPostgres.getThreadById('thread-123');
-  
+
       // Assert
       expect(thread).toMatchObject({
         id: 'thread-123',
@@ -107,16 +107,15 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'Dicoding Indonesia',
         username: 'dicoding',
       });
-      
+
       expect(typeof thread.date).toBe('string');
       expect(new Date(thread.date).toISOString()).toBe(thread.date);
     });
-    
-  
+
     it('should throw NotFoundError when thread does not exist', async () => {
       // Arrange
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, () => '123');
-  
+
       // Action & Assert
       await expect(threadRepositoryPostgres.getThreadById('non-existent-id'))
         .rejects.toThrowError(NotFoundError);

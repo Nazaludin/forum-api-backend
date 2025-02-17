@@ -38,11 +38,11 @@ describe('ThreadDetail entities', () => {
   it('should throw error when data type does not match the specification', () => {
     // Arrange
     const payload = {
-      id: 123, 
+      id: 123,
       title: 'Judul Thread',
       body: 'Isi thread ini',
-      date: 1700000000000, 
-      username: true, 
+      date: 1700000000000,
+      username: true,
     };
 
     // Act & Assert

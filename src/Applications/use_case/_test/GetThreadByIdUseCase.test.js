@@ -15,35 +15,31 @@ describe('GetThreadByIdUseCase', () => {
     const mockCommentRepository = new CommentRepository();
 
     // Mock implementation for thread repository
-    mockThreadRepository.getThreadById = jest.fn().mockImplementation(async (id) => {
-      return new ThreadDetail({
-        id,
-        title: 'sebuah thread',
-        body: 'sebuah body thread',
-        date: fixedDate,
-        username: 'dicoding',
-      });
-    });
+    mockThreadRepository.getThreadById = jest.fn().mockImplementation(async (id) => new ThreadDetail({
+      id,
+      title: 'sebuah thread',
+      body: 'sebuah body thread',
+      date: fixedDate,
+      username: 'dicoding',
+    }));
 
     // Mock implementation for comment repository
-    mockCommentRepository.getCommentsByThreadId = jest.fn().mockImplementation(async (threadId) => {
-      return [
-        new CommentDetail({
-          id: 'comment-123',
-          username: 'johndoe',
-          date: fixedDate,
-          content: 'sebuah comment',
-          is_deleted: false,
-        }),
-        new CommentDetail({
-          id: 'comment-456',
-          username: 'dicoding',
-          date: fixedDate,
-          content: '**komentar telah dihapus**',
-          is_deleted: true,
-        }),
-      ];
-    });
+    mockCommentRepository.getCommentsByThreadId = jest.fn().mockImplementation(async (threadId) => [
+      new CommentDetail({
+        id: 'comment-123',
+        username: 'johndoe',
+        date: fixedDate,
+        content: 'sebuah comment',
+        is_deleted: false,
+      }),
+      new CommentDetail({
+        id: 'comment-456',
+        username: 'dicoding',
+        date: fixedDate,
+        content: '**komentar telah dihapus**',
+        is_deleted: true,
+      }),
+    ]);
 
     const getThreadByIdUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,

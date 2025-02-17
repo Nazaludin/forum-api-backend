@@ -12,40 +12,39 @@ describe('AddCommentUseCase', () => {
     };
     const owner = 'user-123';
     const threadId = 'thread-123';
-  
+
     // Mocking repositories
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
-  
+
     mockThreadRepository.verifyThreadExist = jest.fn().mockResolvedValue();
     mockCommentRepository.addComment = jest.fn().mockResolvedValue(
       new AddedComment({
         id: 'comment-123',
         content: useCasePayload.content,
         owner,
-      })
+      }),
     );
 
-    const addCommentUseCase = new AddCommentUseCase({ 
-      threadRepository: mockThreadRepository, 
-      commentRepository: mockCommentRepository 
+    const addCommentUseCase = new AddCommentUseCase({
+      threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
     });
-  
+
     // Act
     const addedComment = await addCommentUseCase.execute(useCasePayload, threadId, owner);
-  
+
     // Assert
     expect(mockThreadRepository.verifyThreadExist).toHaveBeenCalledWith(threadId);
     expect(mockCommentRepository.addComment)
       .toHaveBeenCalledWith(expect.any(NewComment), threadId, owner);
-  
+
     expect(addedComment).toStrictEqual(new AddedComment({
       id: 'comment-123',
       content: useCasePayload.content,
       owner,
     }));
   });
-  
 
   it('should throw error when payload does not contain needed properties', async () => {
     // Arrange
@@ -53,9 +52,9 @@ describe('AddCommentUseCase', () => {
     const owner = 'user-123';
     const threadId = 'thread-123';
 
-    const addCommentUseCase = new AddCommentUseCase({ 
-      threadRepository: { verifyThreadExist: jest.fn() }, 
-      commentRepository: { addComment: jest.fn() } 
+    const addCommentUseCase = new AddCommentUseCase({
+      threadRepository: { verifyThreadExist: jest.fn() },
+      commentRepository: { addComment: jest.fn() },
     });
 
     // Act & Assert
@@ -72,9 +71,9 @@ describe('AddCommentUseCase', () => {
     const owner = 'user-123';
     const threadId = 'thread-123';
 
-    const addCommentUseCase = new AddCommentUseCase({ 
-      threadRepository: { verifyThreadExist: jest.fn() }, 
-      commentRepository: { addComment: jest.fn() } 
+    const addCommentUseCase = new AddCommentUseCase({
+      threadRepository: { verifyThreadExist: jest.fn() },
+      commentRepository: { addComment: jest.fn() },
     });
 
     // Act & Assert

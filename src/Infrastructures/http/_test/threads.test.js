@@ -1,8 +1,8 @@
+const Jwt = require('@hapi/jwt');
 const pool = require('../../database/postgres/pool');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
-const Jwt = require('@hapi/jwt');
 const container = require('../../container');
 const createServer = require('../createServer');
 
@@ -24,7 +24,7 @@ describe('/threads endpoint', () => {
         body: 'Dicoding Indonesia',
       };
       const server = await createServer(container);
-    
+
       // Buat user terlebih dahulu
       await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
 
@@ -34,9 +34,9 @@ describe('/threads endpoint', () => {
       // Generate JWT token
       const accessToken = Jwt.token.generate(
         { id: 'user-123' },
-        process.env.ACCESS_TOKEN_KEY
+        process.env.ACCESS_TOKEN_KEY,
       );
-    
+
       // Action
       const response = await server.inject({
         method: 'POST',
@@ -64,7 +64,7 @@ describe('/threads endpoint', () => {
 
       const accessToken = Jwt.token.generate(
         { id: 'user-123' },
-        process.env.ACCESS_TOKEN_KEY
+        process.env.ACCESS_TOKEN_KEY,
       );
 
       // Action
@@ -93,7 +93,7 @@ describe('/threads endpoint', () => {
 
       const accessToken = Jwt.token.generate(
         { id: 'user-123' },
-        process.env.ACCESS_TOKEN_KEY
+        process.env.ACCESS_TOKEN_KEY,
       );
 
       // Action
@@ -121,16 +121,16 @@ describe('/threads endpoint', () => {
         content: 'Ini adalah komentar',
       };
       const server = await createServer(container);
-    
+
       // Buat user terlebih dahulu
       await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', title: 'Thread Test', owner: 'user-123' });
 
       const accessToken = Jwt.token.generate(
         { id: 'user-123' },
-        process.env.ACCESS_TOKEN_KEY
+        process.env.ACCESS_TOKEN_KEY,
       );
-    
+
       // Action
       const response = await server.inject({
         method: 'POST',
@@ -159,7 +159,7 @@ describe('/threads endpoint', () => {
 
       const accessToken = Jwt.token.generate(
         { id: 'user-123' },
-        process.env.ACCESS_TOKEN_KEY
+        process.env.ACCESS_TOKEN_KEY,
       );
 
       // Action
@@ -189,7 +189,7 @@ describe('/threads endpoint', () => {
 
       const accessToken = Jwt.token.generate(
         { id: 'user-123' },
-        process.env.ACCESS_TOKEN_KEY
+        process.env.ACCESS_TOKEN_KEY,
       );
 
       // Action
@@ -210,36 +210,38 @@ describe('/threads endpoint', () => {
     });
   });
 
-// DELETE COMMENT
-describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
-  it('should respond 200 and soft delete the comment', async () => {
+  // DELETE COMMENT
+  describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
+    it('should respond 200 and soft delete the comment', async () => {
       // Arrange
       const server = await createServer(container);
-        
-        // Buat user & thread
-        await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
-        await ThreadsTableTestHelper.addThread({ id: 'thread-123', title: 'Thread Dicoding', body:'Isi Thread Dicoding',owner: 'user-123' });
-        await CommentsTableTestHelper.addComment({ 
-          id: 'comment-123', 
-          content: 'Komentar Dicoding', 
-          threadId: 'thread-123', 
-          owner: 'user-123',
+
+      // Buat user & thread
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-123', title: 'Thread Dicoding', body: 'Isi Thread Dicoding', owner: 'user-123',
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'Komentar Dicoding',
+        threadId: 'thread-123',
+        owner: 'user-123',
       });
 
       // Generate JWT token
       const accessToken = Jwt.token.generate(
         { id: 'user-123' },
-          process.env.ACCESS_TOKEN_KEY
+        process.env.ACCESS_TOKEN_KEY,
       );
-      
+
       // Action
       const response = await server.inject({
-          method: 'DELETE',
-          url: '/threads/thread-123/comments/comment-123',
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+        method: 'DELETE',
+        url: '/threads/thread-123/comments/comment-123',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-        // Assert
+      // Assert
       expect(response.statusCode).toEqual(200);
 
       const responseJson = JSON.parse(response.payload);
@@ -247,34 +249,35 @@ describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
       // Pastikan komentar masih ada tetapi dalam kondisi soft delete
       const comment = await CommentsTableTestHelper.findCommentById('comment-123');
       expect(comment).toHaveLength(1);
-      expect(comment[0].is_deleted).toEqual(true);  // Harus true karena soft delete
-  });
+      expect(comment[0].is_deleted).toEqual(true); // Harus true karena soft delete
+    });
 
-  it('should respond 404 when comment does not exist', async () => {
-  
-        // Arrange
+    it('should respond 404 when comment does not exist', async () => {
+      // Arrange
       const server = await createServer(container);
       // await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
- // Buat user & thread
- await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
- await ThreadsTableTestHelper.addThread({ id: 'thread-123', title: 'Thread Dicoding', body:'Isi Thread Dicoding',owner: 'user-123' });
- await CommentsTableTestHelper.addComment({ 
-   id: 'comment-123', 
-   content: 'Komentar Dicoding', 
-   threadId: 'thread-123', 
-   owner: 'user-123',
-});
+      // Buat user & thread
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-123', title: 'Thread Dicoding', body: 'Isi Thread Dicoding', owner: 'user-123',
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'Komentar Dicoding',
+        threadId: 'thread-123',
+        owner: 'user-123',
+      });
 
       const accessToken = Jwt.token.generate(
-          { id: 'user-123' },
-          process.env.ACCESS_TOKEN_KEY
+        { id: 'user-123' },
+        process.env.ACCESS_TOKEN_KEY,
       );
 
       // Action
       const response = await server.inject({
-          method: 'DELETE',
-          url: '/threads/thread-123/comments/comment-999', // ID tidak ada
-          headers: { Authorization: `Bearer ${accessToken}` },
+        method: 'DELETE',
+        url: '/threads/thread-123/comments/comment-999', // ID tidak ada
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       // Assert
@@ -282,9 +285,9 @@ describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
       const responseJson = JSON.parse(response.payload);
       expect(responseJson.status).toEqual('fail');
       expect(responseJson.message).toEqual('Komentar tidak ditemukan');
-  });
+    });
 
-  it('should respond 403 when user is not the comment owner', async () => {
+    it('should respond 403 when user is not the comment owner', async () => {
       // Arrange
       const server = await createServer(container);
 
@@ -293,26 +296,28 @@ describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
       await UsersTableTestHelper.addUser({ id: 'user-456', username: 'anotheruser' });
 
       // Buat thread & komentar milik user-123
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123', title: 'Thread Dicoding', body:'Isi thread dicoding', owner: 'user-123' });
-      await CommentsTableTestHelper.addComment({ 
-          id: 'comment-123', 
-          content: 'Komentar Dicoding', 
-          threadId: 'thread-123', 
-          owner: 'user-123',
-          is_deleted: false,
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-123', title: 'Thread Dicoding', body: 'Isi thread dicoding', owner: 'user-123',
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'Komentar Dicoding',
+        threadId: 'thread-123',
+        owner: 'user-123',
+        is_deleted: false,
       });
 
       // Generate token untuk user-456 (bukan pemilik komentar)
       const accessToken = Jwt.token.generate(
-          { id: 'user-456' },
-          process.env.ACCESS_TOKEN_KEY
+        { id: 'user-456' },
+        process.env.ACCESS_TOKEN_KEY,
       );
 
       // Action
       const response = await server.inject({
-          method: 'DELETE',
-          url: '/threads/thread-123/comments/comment-123',
-          headers: { Authorization: `Bearer ${accessToken}` },
+        method: 'DELETE',
+        url: '/threads/thread-123/comments/comment-123',
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       // Assert
@@ -320,65 +325,63 @@ describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
       const responseJson = JSON.parse(response.payload);
       expect(responseJson.status).toEqual('fail');
       expect(responseJson.message).toEqual('Anda tidak memiliki akses untuk menghapus komentar ini');
+    });
   });
-});
 
- 
-describe('when GET /threads/{threadId}', () => {
-  it('should respond 200 and return thread details', async () => {
+  describe('when GET /threads/{threadId}', () => {
+    it('should respond 200 and return thread details', async () => {
     // Arrange
-    const server = await createServer(container);
+      const server = await createServer(container);
 
-    // Tambahkan user dan thread ke dalam database
-    await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
-    await ThreadsTableTestHelper.addThread({ 
-      id: 'thread-123', 
-      title: 'Thread Dicoding', 
-      body: 'Isi Thread Dicoding',
-      owner: 'user-123' 
+      // Tambahkan user dan thread ke dalam database
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-123',
+        title: 'Thread Dicoding',
+        body: 'Isi Thread Dicoding',
+        owner: 'user-123',
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'Komentar Dicoding',
+        threadId: 'thread-123',
+        owner: 'user-123',
+      });
+
+      // Action
+      const response = await server.inject({
+        method: 'GET',
+        url: '/threads/thread-123',
+      });
+
+      // Assert
+      expect(response.statusCode).toEqual(200);
+      const responseJson = JSON.parse(response.payload);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.thread).toBeDefined();
+      expect(responseJson.data.thread.id).toEqual('thread-123');
+      expect(responseJson.data.thread.title).toEqual('Thread Dicoding');
+      expect(responseJson.data.thread.body).toEqual('Isi Thread Dicoding');
+      expect(responseJson.data.thread.comments).toHaveLength(1);
+      expect(responseJson.data.thread.comments[0].id).toEqual('comment-123');
+      expect(responseJson.data.thread.comments[0].content).toEqual('Komentar Dicoding');
     });
-    await CommentsTableTestHelper.addComment({ 
-      id: 'comment-123', 
-      content: 'Komentar Dicoding', 
-      threadId: 'thread-123', 
-      owner: 'user-123' 
-    });
 
-    // Action
-    const response = await server.inject({
-      method: 'GET',
-      url: '/threads/thread-123',
-    });
-
-    // Assert
-    expect(response.statusCode).toEqual(200);
-    const responseJson = JSON.parse(response.payload);
-    expect(responseJson.status).toEqual('success');
-    expect(responseJson.data.thread).toBeDefined();
-    expect(responseJson.data.thread.id).toEqual('thread-123');
-    expect(responseJson.data.thread.title).toEqual('Thread Dicoding');
-    expect(responseJson.data.thread.body).toEqual('Isi Thread Dicoding');
-    expect(responseJson.data.thread.comments).toHaveLength(1);
-    expect(responseJson.data.thread.comments[0].id).toEqual('comment-123');
-    expect(responseJson.data.thread.comments[0].content).toEqual('Komentar Dicoding');
-  });
-
-  it('should respond 404 when thread does not exist', async () => {
+    it('should respond 404 when thread does not exist', async () => {
     // Arrange
-    const server = await createServer(container);
+      const server = await createServer(container);
 
-    // Action
-    const response = await server.inject({
-      method: 'GET',
-      url: '/threads/thread-999', // ID thread tidak ada
+      // Action
+      const response = await server.inject({
+        method: 'GET',
+        url: '/threads/thread-999', // ID thread tidak ada
+      });
+
+      // Assert
+      expect(response.statusCode).toEqual(404);
+      const responseJson = JSON.parse(response.payload);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toEqual('Thread tidak ditemukan');
     });
-
-    // Assert
-    expect(response.statusCode).toEqual(404);
-    const responseJson = JSON.parse(response.payload);
-    expect(responseJson.status).toEqual('fail');
-    expect(responseJson.message).toEqual('Thread tidak ditemukan');
   });
-});
-
 });

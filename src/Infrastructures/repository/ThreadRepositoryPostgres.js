@@ -46,9 +46,9 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       `,
       values: [threadId],
     };
-  
+
     const result = await this._pool.query(threadQuery);
-  
+
     if (!result.rowCount) {
       throw new NotFoundError('Thread tidak ditemukan');
     }
@@ -61,8 +61,6 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       username: thread.username,
     });
   }
-  
-  
 }
 
 module.exports = ThreadRepositoryPostgres;
