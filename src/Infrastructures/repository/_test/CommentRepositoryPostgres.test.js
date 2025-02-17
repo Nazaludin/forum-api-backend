@@ -61,7 +61,7 @@ describe('CommentRepositoryPostgres', () => {
         .toThrowError(NotFoundError);
     });
 
-    it('should not throw error when comment exists', async () => {
+    it('should not throw NotFoundError when comment exists', async () => {
       // Arrange
       await CommentsTableTestHelper.addComment({ id: 'comment-123', content: 'dicoding', threadId: 'thread-123', owner: 'user-123' });
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
@@ -69,7 +69,7 @@ describe('CommentRepositoryPostgres', () => {
       // Action & Assert
       await expect(commentRepositoryPostgres.verifyCommentExist('comment-123'))
         .resolves
-        .not.toThrowError();
+        .not.toThrowError(NotFoundError);
     });
   });
 
@@ -112,7 +112,9 @@ describe('CommentRepositoryPostgres', () => {
   
       // Action & Assert
       await expect(commentRepositoryPostgres.verifyCommentOwner('comment-123', 'user-123'))
-        .resolves.not.toThrowError();
+        .resolves.not.toThrowError(NotFoundError);
+      await expect(commentRepositoryPostgres.verifyCommentOwner('comment-123', 'user-123'))
+        .resolves.not.toThrowError(AuthorizationError);
     });
   });
 
@@ -218,7 +220,21 @@ describe('CommentRepositoryPostgres', () => {
       expect(comments[1].date).toStrictEqual('2024-02-15T10:02:00.000Z');
   
       expect(new Date(comments[0].date).getTime()).toBeLessThan(new Date(comments[1].date).getTime());
-  });
+  
+      expect(comments[0]).toStrictEqual(new CommentDetail({
+        id: 'comment-1',
+        username: 'dicoding', 
+        date: '2024-02-15T10:01:00.000Z',
+        content: 'Komentar pertama',
+    }));
+
+    expect(comments[1]).toStrictEqual(new CommentDetail({
+        id: 'comment-2',
+        username: 'dicoding',
+        date: '2024-02-15T10:02:00.000Z',
+        content: 'Komentar kedua',
+    }));
+    });
   
 
     it('should return an empty array when there are no comments', async () => {

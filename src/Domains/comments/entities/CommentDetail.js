@@ -8,8 +8,8 @@ class CommentDetail {
         this.content = payload.is_deleted ? '**komentar telah dihapus**' : payload.content;
     }
 
-    _verifyPayload({ id, username, date, content, is_deleted }) {
-        if (!id || !username || !date || content === undefined || is_deleted === undefined) {
+    _verifyPayload({ id, username, date, content, is_deleted = false}) {
+        if (!id || !username || !date || content === undefined ) {
             throw new Error('COMMENT_DETAIL.NOT_CONTAIN_NEEDED_PROPERTY');
         }
 

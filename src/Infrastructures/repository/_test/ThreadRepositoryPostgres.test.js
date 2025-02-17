@@ -44,6 +44,14 @@ describe('ThreadRepositoryPostgres', () => {
 
       const threads = await ThreadsTableTestHelper.findThreadById('thread-123');
       expect(threads).toHaveLength(1);
+
+      // Verifikasi semua field di database
+    const threadInDb = threads[0];
+    expect(threadInDb.title).toBe('Dicoding');
+    expect(threadInDb.body).toBe('Dicoding Indonesia');
+    expect(threadInDb.owner).toBe('user-123');
+    expect(threadInDb.date).toBeDefined();
+    expect(new Date(threadInDb.date)).toBeInstanceOf(Date);
     });
   });
 
@@ -58,7 +66,7 @@ describe('ThreadRepositoryPostgres', () => {
         .toThrowError(NotFoundError);
     });
 
-    it('should not throw error when thread exists', async () => {
+    it('should not throw NotFoundError when thread exists', async () => {
       // Arrange
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
@@ -81,7 +89,6 @@ describe('ThreadRepositoryPostgres', () => {
       const fakeIdGenerator = () => '123';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
   
-      // Insert thread ke database terlebih dahulu
       await ThreadsTableTestHelper.addThread({
         id: 'thread-123',
         title: newThread.title,
@@ -101,19 +108,18 @@ describe('ThreadRepositoryPostgres', () => {
         username: 'dicoding',
       });
       
-      // Cek apakah `date` adalah string valid
       expect(typeof thread.date).toBe('string');
       expect(new Date(thread.date).toISOString()).toBe(thread.date);
     });
     
   
-    it('should throw error when thread does not exist', async () => {
+    it('should throw NotFoundError when thread does not exist', async () => {
       // Arrange
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, () => '123');
   
       // Action & Assert
       await expect(threadRepositoryPostgres.getThreadById('non-existent-id'))
-        .rejects.toThrowError();
+        .rejects.toThrowError(NotFoundError);
     });
   });
 });
